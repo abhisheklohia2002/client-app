@@ -76,3 +76,12 @@ export const toppings: Topping[] = [
     isAvailable: true,
   },
 ];
+
+
+export interface ITenants{
+    id:number,
+    name:string,
+    address:string,
+    updatedAt?:string,
+    createdAt?:string
+}

@@ -10,10 +10,20 @@ import {
 import Link from "next/link";
 import { Phone, ShoppingBasket } from "lucide-react";
 import { Button } from "../ui/button";
+import { ITenants } from "@/types/constants";
 export default async function Header() {
-    const tenantResponse = await fetch(`${process.env.BACKEND_URL}/api/auth/tenant?perPage=100&currentPage=1`);
-    const restaurants = await tenantResponse.json();
-    console.log(restaurants,'tenats')
+  const tenantResponse = await fetch(
+    `${process.env.BACKEND_URL}/api/auth/tenant?perPage=100&currentPage=1`,
+    {
+      next: {
+        revalidate: 3600,
+      },
+    },
+  );
+  if(!tenantResponse.ok){
+        throw new Error("failed to fetch tenants")
+  }
+  const restaurants = await tenantResponse.json();
   return (
     <header className="bg-white">
       <nav className="container mx-auto py-5 flex items-center justify-between">
@@ -45,9 +55,13 @@ export default async function Header() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="Cheese Delightt">Cheese Delight</SelectItem>
-                <SelectItem value="Pizza Hutsk">Pizza Huts</SelectItem>
-                <SelectItem value="Kids corner">Kids corner</SelectItem>
+                {restaurants?.data?.map((elem: ITenants, index: number) => {
+                  return (
+                    <SelectItem key={index} value={String(elem.id)}>
+                      {elem.name}
+                    </SelectItem>
+                  );
+                })}
               </SelectGroup>
             </SelectContent>
           </Select>
