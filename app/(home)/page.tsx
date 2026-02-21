@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProductCard from "@/components/card/ProductCard";
+import { products } from "@/types/constants";
 export default function Home() {
   return (
     <>
@@ -32,21 +34,28 @@ export default function Home() {
 
       <section>
         <div className="container mx-auto py-8">
-          <Tabs defaultValue="Pizza" className="w-[400px]">
+          <Tabs defaultValue="Pizza">
             <TabsList>
-              <TabsTrigger className="cursor-pointer" value="Pizza">Pizza</TabsTrigger>
-              <TabsTrigger className="cursor-pointer" value="Beverages">Beverages</TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="Pizza">
+                Pizza
+              </TabsTrigger>
+              <TabsTrigger className="cursor-pointer" value="Beverages">
+                Beverages
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="Pizza">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam
-              recusandae quaerat impedit laboriosam hic, aperiam voluptatem
-              tempora, laudantium obcaecati similique amet expedita, sapiente
-              nihil libero.
+             <div className="grid grid-cols-4 gap-4 mt-6">
+               {products?.map((elem, index) => {
+                return <ProductCard key={index} product={elem} />;
+              })}
+             </div>
             </TabsContent>
             <TabsContent value="Beverages">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Unde,
-              tempore molestiae eius suscipit, dolorem, sunt rerum dicta fugit
-              dolorum rem praesentium vel provident accusantium nihil.
+                <div className="grid grid-cols-4 gap-4 mt-6">
+               {products?.map((elem, index) => {
+                return <ProductCard key={index} product={elem} />;
+              })}
+             </div>
             </TabsContent>
           </Tabs>
         </div>
