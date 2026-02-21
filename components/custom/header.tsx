@@ -10,7 +10,10 @@ import {
 import Link from "next/link";
 import { Phone, ShoppingBasket } from "lucide-react";
 import { Button } from "../ui/button";
-export default function Header() {
+export default async function Header() {
+    const tenantResponse = await fetch(`${process.env.BACKEND_URL}/api/auth/tenant?perPage=100&currentPage=1`);
+    const restaurants = await tenantResponse.json();
+    console.log(restaurants,'tenats')
   return (
     <header className="bg-white">
       <nav className="container mx-auto py-5 flex items-center justify-between">
