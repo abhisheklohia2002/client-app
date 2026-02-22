@@ -1,25 +1,42 @@
 "use client";
 
-import React, { useState } from "react";
-import { Topping, toppings } from "@/types/constants";
+import React, { useEffect, useState } from "react";
+import { Topping } from "@/types/constants";
 import ToppingCard from "./Topping-card";
 
 export default function ToppingList() {
-  const [selectedToppings, setSelectedToppings] = useState<Topping[]>([
-    toppings[0],
-  ]);
-
+  const [toppingsData, setToppingsData] = useState<Topping[]>([]);
+  const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
   const handleToppingToggle = (topping: Topping) => {
-    const isSelected = selectedToppings.some((t) => t.id === topping.id);
+    const isSelected = selectedToppings.some((t) => t._id === topping._id);
 
     if (isSelected) {
-      setSelectedToppings((prev) => prev.filter((t) => t.id !== topping.id));
+      setSelectedToppings((prev) => prev.filter((t) => t._id !== topping._id));
       return;
     }
 
     setSelectedToppings((prev) => [...prev, topping]);
   };
 
+  useEffect(() => {
+    const fetchTopping = async () => {
+      try {
+        const toppingResponse = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/catalog/topping`,
+        );
+        const response = await toppingResponse.json();
+
+        setToppingsData(response?.finalTopping || []);
+        setSelectedToppings(
+          response?.finalTopping?.[0] ? [response.finalTopping[0]] : [],
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchTopping();
+  }, []);
   return (
     <section className="mt-2">
       <h3 className="text-sm font-medium cursor-pointer select-none">
@@ -27,9 +44,9 @@ export default function ToppingList() {
       </h3>
 
       <div className="grid grid-cols-3 gap-4 mt-4">
-        {toppings.map((topping) => (
+        {toppingsData.map((topping) => (
           <ToppingCard
-            key={topping.id}
+            key={topping._id}
             topping={topping}
             selectedToppings={selectedToppings}
             onToggle={handleToppingToggle}

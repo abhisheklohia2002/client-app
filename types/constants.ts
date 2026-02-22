@@ -46,36 +46,13 @@ export const products: Product[] = [
 
 
 export type Topping = {
-  id: string;
+  _id: string;
   name: string;
   image: string;
   price: number;
   isAvailable: boolean;
 };
 
-export const toppings: Topping[] = [
-  {
-    id: "1",
-    name: "Chicken",
-    image: "/chicken.png",
-    price: 50,
-    isAvailable: true,
-  },
-  {
-    id: "2",
-    name: "Jalapeno",
-    image: "/chicken.png",
-    price: 50,
-    isAvailable: true,
-  },
-  {
-    id: "3",
-    name: "Cheese",
-    image: "/cheese.png",
-    price: 50,
-    isAvailable: true,
-  },
-];
 
 
 export interface ITenants{

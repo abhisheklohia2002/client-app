@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Header from "@/components/custom/header";
+import Header from "@/components/custom-header/header";
+import StoreProvider from "./StoreProvider";
 
 const manRopeSans = Manrope({
   variable: "--font-manrope",
@@ -22,17 +23,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <StoreProvider>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           manRopeSans.variable
         )}
-      >
+        >
        <Header/>
         <main>
         {children}
         </main>
       </body>
+        </StoreProvider>
     </html>
   );
 }

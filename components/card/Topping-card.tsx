@@ -17,7 +17,7 @@ export default function ToppingCard({
   selectedToppings,
   onToggle,
 }: Props) {
-  const isSelected = selectedToppings.some((t) => t.id === topping.id);
+  const isSelected = selectedToppings.some((t) => t._id === topping._id);
 
   return (
     <Button
