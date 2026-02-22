@@ -1,21 +1,9 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ProductCard from "@/components/card/ProductCard";
-import { products } from "@/types/constants";
+import ProductList from "./productList";
+import { Suspense } from "react";
+import { SkeletonCard } from "@/components/card/Skeleton";
 export default async function Home() {
-  const categoryResponse = await fetch(
-    `${process.env.BACKEND_URL}/api/catalog/category/`,
-    {
-      next: {
-        revalidate: 3600,
-      },
-    },
-  );
-  if (!categoryResponse.ok) {
-    throw new Error("failed to fetch category");
-  }
-  const response = await categoryResponse.json();
   return (
     <>
       <section className="bg-white ">
@@ -45,37 +33,20 @@ export default async function Home() {
       </section>
 
       <section>
-        <div className="container mx-auto py-8">
-          <Tabs defaultValue={response?.category[0]?.name}>
-            <TabsList>
-              {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              response?.category?.map((elem: any, index: number) => {
-                return (
-                  <TabsTrigger
-                    key={index}
-                    className="cursor-pointer"
-                    value={elem.name}
-                  >
-                    {elem?.name}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-            {// eslint-disable-next-line @typescript-eslint/no-explicit-any
-            response?.category?.map((elem: any, index: number) => {
-              return (
-                <TabsContent key={index} value={elem.name}>
-                  <div className="grid grid-cols-4 gap-4 mt-6">
-                    {products?.map((elem, index) => {
-                      return <ProductCard key={index} product={elem} />;
-                    })}
-                  </div>
-                </TabsContent>
-              );
-            })}
-          </Tabs>
-        </div>
+        <Suspense
+          fallback={
+            <>
+              <div className="flex space-x-4">
+                <SkeletonCard></SkeletonCard>
+                <SkeletonCard></SkeletonCard>
+                <SkeletonCard></SkeletonCard>
+                <SkeletonCard></SkeletonCard>
+              </div>
+            </>
+          }
+        >
+          <ProductList />
+        </Suspense>
       </section>
     </>
   );
