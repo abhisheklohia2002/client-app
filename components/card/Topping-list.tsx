@@ -3,8 +3,10 @@
 import React, { useEffect, useState } from "react";
 import { Topping } from "@/types/constants";
 import ToppingCard from "./Topping-card";
-
-export default function ToppingList() {
+interface IPropsTopping {
+  handleCheckBox: (data: Topping[]) => void;
+}
+export default function ToppingList({ handleCheckBox }: IPropsTopping) {
   const [toppingsData, setToppingsData] = useState<Topping[]>([]);
   const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
   const handleToppingToggle = (topping: Topping) => {
@@ -16,6 +18,7 @@ export default function ToppingList() {
     }
 
     setSelectedToppings((prev) => [...prev, topping]);
+    handleCheckBox?.(selectedToppings);
   };
 
   useEffect(() => {
@@ -30,6 +33,7 @@ export default function ToppingList() {
         setSelectedToppings(
           response?.finalTopping?.[0] ? [response.finalTopping[0]] : [],
         );
+        handleCheckBox?.(response?.finalTopping?.[0]);
       } catch (error) {
         console.error(error);
       }

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,9 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "../ui/button";
 import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
-import { IProduct } from "@/types/constants";
+import { IProduct, PriceConfiguration, Topping } from "@/types/constants";
+import { useAppDispatch } from "@/lib/store/hooks/hooks";
+import { addToCart, ICartItem } from "@/lib/store/features/cart/cartSlice";
 type PropType = {
   product: IProduct;
 };
@@ -24,7 +26,22 @@ type ChooseConfig = {
 
 export default function DialogCard({ product }: PropType) {
   const [chooseConfig, setChooseConfig] = useState<ChooseConfig>();
-  const handleToCart = () => {};
+  const [toppingsData, setToppingsData] = useState<Topping[]>([]);
+  const dispatch = useAppDispatch();
+  const { priceConfiguration, ...productElem } = product as IProduct & {
+    priceConfiguration?: unknown;
+  };
+  const handleToCart = () => {
+    const payload: ICartItem = {
+      product: productElem as IProduct,
+      chooseConfiguration: {
+        priceConfiguration: chooseConfig,
+        topping: toppingsData,
+      },
+      qty: 1,
+    };
+    dispatch(addToCart(payload));
+  };
   const handleRadioChange = (key: string, data: string) => {
     setChooseConfig((prev) => {
       return {
@@ -33,33 +50,36 @@ export default function DialogCard({ product }: PropType) {
       };
     });
   };
+  const handleCheckBox = (data: Topping[]) => {
+    setToppingsData(data);
+  };
   return (
     <Dialog>
       <DialogTrigger className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2 rounded-full shadow transition-all duration-150">
         Choose
       </DialogTrigger>
 
-      <DialogContent className="max-w-dvw p-0">
+      <DialogContent className="max-w-full p-0">
         <VisuallyHidden>
           <DialogTitle>{product.name}</DialogTitle>
         </VisuallyHidden>
         <div className="flex">
           {/* Left Image */}
-          <div className="w-1/2 bg-white rounded-xl flex items-center justify-center p-6">
+          <div className="w-[40%] bg-white rounded-xl flex items-center justify-center p-6">
             <Image
               alt={product.name}
-              src={product?.image}
+              src={product.image}
               width={280}
               height={240}
             />
           </div>
 
-          <div className="w-3/3 p-8">
+          <div className="w-[60%] p-8">
             <h3 className="text-xl font-bold">{product.name}</h3>
             <p className="mt-1 text-foreground/70">{product.description}</p>
 
             <div className="mt-6">
-              {Object.entries(product.priceConfiguration).map(
+              {Object.entries(priceConfiguration as PriceConfiguration).map(
                 ([key, value]) => {
                   const options = Object.keys(value.availableOptions);
 
@@ -70,9 +90,9 @@ export default function DialogCard({ product }: PropType) {
                       </h4>
 
                       <RadioGroup
-                        defaultValue={options[0]}
-                        onValueChange={(data)=>{
-                            handleRadioChange(key,data)
+                        // defaultValue={options[0]}
+                        onValueChange={(data) => {
+                          handleRadioChange(key, data);
                         }}
                         className="grid grid-cols-3 gap-4 mt-3 max-h-48"
                       >
@@ -81,7 +101,6 @@ export default function DialogCard({ product }: PropType) {
                             key={option}
                             value={option}
                             label={`${option}`}
-                            
                           />
                         ))}
                       </RadioGroup>
@@ -91,13 +110,13 @@ export default function DialogCard({ product }: PropType) {
               )}
             </div>
 
-            <ToppingList />
+            <ToppingList handleCheckBox={handleCheckBox} />
             <div className="flex items-center justify-between mt-3">
               <span className=" text-sm font-medium cursor-pointer select-none">
                 ₹400
               </span>
               <Button
-                onClick={handleToCart}
+                onClick={() => handleToCart()}
                 className=" text-sm font-medium cursor-pointer select-none"
               >
                 <ShoppingCart />

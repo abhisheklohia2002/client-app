@@ -8,9 +8,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
-import { Phone, ShoppingBasket } from "lucide-react";
+import { Phone } from "lucide-react";
 import { Button } from "../ui/button";
 import { ITenants } from "@/types/constants";
+import ShoppingCart from "./shoppingCart";
 export default async function Header() {
   const tenantResponse = await fetch(
     `${process.env.BACKEND_URL}/api/auth/tenant?perPage=100&currentPage=1`,
@@ -79,7 +80,7 @@ export default async function Header() {
               </Link>
             </li>
           </ul>
-          <ShoppingBasket/>
+          <ShoppingCart/>
           <div className="flex items-center gap-x-2 ml-12 font-medium">
             <Phone />
             <span className="hover:text-primary cursor-pointer">

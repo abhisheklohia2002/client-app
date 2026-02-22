@@ -69,7 +69,7 @@ export  interface IProduct {
   description: string;
   image: string;
 
-  priceConfiguration: PriceConfiguration;
+  priceConfiguration?: PriceConfiguration;
 
   attributes: ProductAttribute[];
 
