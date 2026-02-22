@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,7 @@ type ChooseConfig = {
 export default function DialogCard({ product }: PropType) {
   const [chooseConfig, setChooseConfig] = useState<ChooseConfig>();
   const [toppingsData, setToppingsData] = useState<Topping[]>([]);
+  const [open, setOpen] = useState<boolean>(false);
   const dispatch = useAppDispatch();
   const { priceConfiguration, ...productElem } = product as IProduct & {
     priceConfiguration?: unknown;
@@ -40,7 +41,22 @@ export default function DialogCard({ product }: PropType) {
       },
       qty: 1,
     };
+    const existing: ICartItem[] = JSON.parse(
+      localStorage.getItem("addToCart") || "[]",
+    );
+    const idx = existing.findIndex(
+      (item) => item.product._id === payload.product._id,
+    );
+
+    if (idx !== -1) {
+      existing[idx].qty = (existing[idx].qty || 1) + 1;
+    } else {
+      existing.push({ ...payload, qty: 1 });
+    }
+
+    localStorage.setItem("addToCart", JSON.stringify(existing));
     dispatch(addToCart(payload));
+    setOpen(false);
   };
   const handleRadioChange = (key: string, data: string) => {
     setChooseConfig((prev) => {
@@ -53,9 +69,30 @@ export default function DialogCard({ product }: PropType) {
   const handleCheckBox = (data: Topping[]) => {
     setToppingsData(data);
   };
+
+  const totalPrice = useMemo(() => {
+    const toppingPrice = [toppingsData as unknown as Topping].reduce(
+      (acc, curr) => acc + Number(curr.price || 0),
+      0,
+    );
+
+    const configPrice = Object.entries(chooseConfig ?? {}).reduce(
+      (acc, [key, value]) => {
+        const price =
+          product.priceConfiguration?.[key]?.availableOptions?.[value] ?? 0;
+        return acc + Number(price);
+      },
+      0,
+    );
+
+    return toppingPrice + configPrice;
+  }, [toppingsData, chooseConfig, product.priceConfiguration]);
   return (
-    <Dialog>
-      <DialogTrigger className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2 rounded-full shadow transition-all duration-150">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        onClick={() => setOpen(true)}
+        className="bg-primary text-primary-foreground hover:opacity-90 px-6 py-2 rounded-full shadow transition-all duration-150"
+      >
         Choose
       </DialogTrigger>
 
@@ -64,7 +101,6 @@ export default function DialogCard({ product }: PropType) {
           <DialogTitle>{product.name}</DialogTitle>
         </VisuallyHidden>
         <div className="flex">
-          {/* Left Image */}
           <div className="w-[40%] bg-white rounded-xl flex items-center justify-center p-6">
             <Image
               alt={product.name}
@@ -113,11 +149,11 @@ export default function DialogCard({ product }: PropType) {
             <ToppingList handleCheckBox={handleCheckBox} />
             <div className="flex items-center justify-between mt-3">
               <span className=" text-sm font-medium cursor-pointer select-none">
-                ₹400
+                ₹{totalPrice}
               </span>
               <Button
                 onClick={() => handleToCart()}
-                className=" text-sm font-medium cursor-pointer select-none"
+                className=" text-sm font-medium cursor-pointer select-none close"
               >
                 <ShoppingCart />
                 <span>Add to cart</span>

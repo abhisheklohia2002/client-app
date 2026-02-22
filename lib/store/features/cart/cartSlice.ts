@@ -5,7 +5,7 @@ export interface ICartItem {
   product: IProduct;
   chooseConfiguration: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    priceConfiguration:any ;
+    priceConfiguration: any;
     topping: Topping[];
   };
   qty: number;
@@ -22,7 +22,14 @@ export const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action: PayloadAction<Omit<ICartItem, "qty">>) => {
-      state.cartItems.push({ ...action.payload, qty: 1 });
+      const existingItem = state.cartItems.find(
+        (elem) => elem.product._id === action.payload.product._id,
+      );
+      if (existingItem) {
+        existingItem.qty += 1;
+      } else {
+        state.cartItems.push({ ...action.payload, qty: 1 });
+      }
     },
   },
 });
