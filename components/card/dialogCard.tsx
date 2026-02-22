@@ -16,6 +16,7 @@ import Image from "next/image";
 import { IProduct, PriceConfiguration, Topping } from "@/types/constants";
 import { useAppDispatch } from "@/lib/store/hooks/hooks";
 import { addToCart, ICartItem } from "@/lib/store/features/cart/cartSlice";
+import { toast } from "sonner"
 type PropType = {
   product: IProduct;
 };
@@ -56,6 +57,7 @@ export default function DialogCard({ product }: PropType) {
 
     localStorage.setItem("addToCart", JSON.stringify(existing));
     dispatch(addToCart(payload));
+    toast.success("Product has been Add.")
     setOpen(false);
   };
   const handleRadioChange = (key: string, data: string) => {

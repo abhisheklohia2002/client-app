@@ -10,6 +10,8 @@ import {
 
 import { IProduct } from "@/types/constants";
 import DialogCard from "./dialogCard";
+import { productBasePriceSum } from "@/lib/utils";
+
 
 type PropType = {
   product: IProduct;
@@ -36,7 +38,7 @@ export default function ProductCard({ product }: PropType) {
       <CardFooter className="flex items-center justify-between">
         <p className="flex items-center gap-2">
           <span className="text-foreground/70">From</span>
-          <span className="font-bold">${90}</span>
+          <span className="font-bold">₹{productBasePriceSum(product)}</span>
         </p>
 
         <DialogCard product={product}/>
