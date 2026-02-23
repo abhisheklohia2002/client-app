@@ -43,20 +43,6 @@ export default function DialogCard({ product }: PropType) {
       qty: 1,
       totalPrice
     };
-    const existing: ICartItem[] = JSON.parse(
-      localStorage.getItem("addToCart") || "[]",
-    );
-    const idx = existing.findIndex(
-      (item) => item.product._id === payload.product._id,
-    );
-
-    if (idx !== -1) {
-      existing[idx].qty = (existing[idx].qty || 1) + 1;
-    } else {
-      existing.push({ ...payload, qty: 1 });
-    }
-
-    localStorage.setItem("addToCart", JSON.stringify(existing));
     dispatch(addToCart(payload));
     toast.success("Product has been Add.")
     setOpen(false);
@@ -99,11 +85,11 @@ export default function DialogCard({ product }: PropType) {
         Choose
       </DialogTrigger>
 
-      <DialogContent className="max-w-full p-0">
+      <DialogContent className="p-0 w-[900px] max-w-[95vw]">
         <VisuallyHidden>
           <DialogTitle>{product.name}</DialogTitle>
         </VisuallyHidden>
-        <div className="flex">
+        <div className="flex flex-col md:flex-row">
           <div className="w-[40%] bg-white rounded-xl flex items-center justify-center p-6">
             <Image
               alt={product.name}

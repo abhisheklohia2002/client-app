@@ -1,47 +1,37 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/card";
 import CartProduct from "./CartProduct";
-import { useAppSelector } from "@/lib/store/hooks/hooks";
-import { ICartItem } from "@/lib/store/features/cart/cartSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks/hooks";
+import {
+  decrementCart,
+  deleteProductById,
+  ICartItem,
+  incrementCart,
+} from "@/lib/store/features/cart/cartSlice";
 import { Mail, Phone, User } from "lucide-react";
-
-function mergeCarts(localCart: ICartItem[], reduxCart: ICartItem[]) {
-  const map = new Map<string, ICartItem>();
-  for (const item of localCart) {
-    map.set(item.product._id, { ...item });
-  }
-  for (const item of reduxCart) {
-    const id = item.product._id;
-    const existing = map.get(id);
-
-    if (existing) {
-      map.set(id, { ...existing, qty: (existing.qty ?? 1) + (item.qty ?? 1) });
-    } else {
-      map.set(id, { ...item });
-    }
-  }
-
-  return Array.from(map.values());
-}
+import Image from "next/image";
 
 export default function Cart() {
   const cartItems = useAppSelector((state) => state.cart.cartItems);
-  const [mergedCart, setMergedCart] = useState<ICartItem[]>([]);
 
-  useEffect(() => {
-    const mergeIsExisted = () => {
-      const local: ICartItem[] = JSON.parse(
-        localStorage.getItem("addToCart") || "[]",
-      );
-      const merged = mergeCarts(local, cartItems);
-      setMergedCart(merged);
-      console.log(mergedCart);
-      localStorage.setItem("addToCart", JSON.stringify(merged));
-    };
-    mergeIsExisted();
-  }, [cartItems]);
+  const dispatch = useAppDispatch();
 
+  const handleAddToCart = (id: string) => {
+    console.log("handle Add");
+    dispatch(incrementCart(id));
+  };
+  const handleDeleteToCart = (id: string) => {
+    console.log("handle subtract");
+    dispatch(decrementCart(id));
+  };
+  const handleDeleteProduct = (id: string) => {
+    dispatch(deleteProductById(id));
+  };
+
+  const cartTotal = useMemo(() => {
+  return cartItems.reduce((acc, item) => acc + (Number(item.totalPrice ?? 0) * (item.qty ?? 1)), 0);
+}, [cartItems]);
   return (
     <Card className="container mx-auto py-5 mt-9 border-none">
       <div className="max-w-5xl max-lg:max-w-2xl mx-auto bg-white p-4">
@@ -53,9 +43,30 @@ export default function Cart() {
 
         <div className="grid lg:grid-cols-3 gap-10 mt-12">
           <div className="lg:col-span-2 space-y-4">
-            {mergedCart?.map((elem: ICartItem, index: number) => {
-              return <CartProduct key={index} cartItems={elem} />;
-            })}
+            {cartItems.length > 0 ? (
+              cartItems?.map((elem: ICartItem, index: number) => {
+                return (
+                  <CartProduct
+                    key={index}
+                    cartItems={elem}
+                    handleAddToCart={handleAddToCart}
+                    handleDeleteToCart={handleDeleteToCart}
+                    handleDeleteProduct={handleDeleteProduct}
+                  />
+                );
+              })
+            ) : (
+              <Card className="border-none ">
+                <div className="flex justify-center">
+                  <Image
+                    alt="Pizza-main"
+                    src={"/empty-cart.png"}
+                    width={300}
+                    height={200}
+                  />
+                </div>
+              </Card>
+            )}
           </div>
 
           <div className="bg-gray-100 rounded-md p-4 h-max">
@@ -71,9 +82,7 @@ export default function Cart() {
                       placeholder="Full Name"
                       className="px-4 py-2.5 bg-white text-slate-900 rounded-md w-full text-sm border-b border-gray-200 pr-10 focus:border-gray-800 outline-none"
                     />
-                    <User
-                    className="w-4 h-4 absolute right-4"
-                    />
+                    <User className="w-4 h-4 absolute right-4" />
                   </div>
 
                   <div className="relative flex items-center">
@@ -82,9 +91,7 @@ export default function Cart() {
                       placeholder="Email"
                       className="px-4 py-2.5 bg-white text-slate-900 rounded-md w-full text-sm border-b border-gray-200 pr-10 focus:border-gray-800 outline-none"
                     />
-                    <Mail
-                     className="w-4 h-4 absolute right-4"
-                    />
+                    <Mail className="w-4 h-4 absolute right-4" />
                   </div>
 
                   <div className="relative flex items-center">
@@ -93,9 +100,7 @@ export default function Cart() {
                       placeholder="Phone No."
                       className="px-4 py-2.5 bg-white text-slate-900 rounded-md w-full text-sm border-b border-gray-200 pr-10 focus:border-gray-800 outline-none"
                     />
-                   <Phone
-                   className="w-4 h-4 absolute right-4"
-                   />
+                    <Phone className="w-4 h-4 absolute right-4" />
                   </div>
                 </div>
               </div>
@@ -105,24 +110,25 @@ export default function Cart() {
               <li className="flex flex-wrap gap-4 text-sm">
                 Subtotal{" "}
                 <span className="ml-auto font-semibold text-slate-900">
-                  $200.00
+                  ₹200.00
                 </span>
               </li>
               <li className="flex flex-wrap gap-4 text-sm">
                 Shipping{" "}
                 <span className="ml-auto font-semibold text-slate-900">
-                  $2.00
+                  ₹2.00
                 </span>
               </li>
               <li className="flex flex-wrap gap-4 text-sm">
                 Tax{" "}
                 <span className="ml-auto font-semibold text-slate-900">
-                  $4.00
+                  ₹4.00
                 </span>
               </li>
               <hr className="border-gray-300" />
               <li className="flex flex-wrap gap-4 text-sm text-slate-900">
-                Total <span className="ml-auto font-semibold">$206.00</span>
+                Total{" "}
+                <span className="ml-auto font-semibold">₹{cartTotal}.00</span>
               </li>
             </ul>
 

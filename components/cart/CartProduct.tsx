@@ -1,10 +1,15 @@
-import { ICartState } from "@/lib/store/features/cart/cartSlice";
 import { Minus, Plus, Trash } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function CartProduct({ cartItems }: any) {
+export default function CartProduct({
+  cartItems,
+  handleDeleteToCart,
+  handleAddToCart,
+  handleDeleteProduct,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: any) {
   return (
     <div className="lg:col-span-2 space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-3 items-start sm:gap-4 gap-6">
@@ -19,10 +24,11 @@ export default function CartProduct({ cartItems }: any) {
           </div>
           <div className="flex flex-col">
             <h3 className="text-base font-semibold text-slate-900">
-              {cartItems?.product.name}
+              {cartItems?.product?.name}
             </h3>
             <p className="text-sm font-medium text-slate-500 mt-2">Chicken</p>
             <button
+              onClick={() => handleDeleteProduct?.(cartItems.product?._id)}
               type="button"
               className="mt-6 font-semibold text-red-500 text-xs flex items-center gap-2 shrink-0 cursor-pointer"
             >
@@ -34,15 +40,21 @@ export default function CartProduct({ cartItems }: any) {
 
         <div className="sm:ml-auto max-sm:flex max-sm:justify-between max-sm:gap-4 max-sm:col-span-full">
           <h4 className="text-base font-semibold text-slate-900">
-            {cartItems?.totalPrice}
+            ₹{cartItems?.totalPrice}
           </h4>
           <div className="flex items-center px-2.5 py-1.5 border border-gray-300 text-slate-900 text-xs font-medium rounded-md sm:mt-6">
             <span className="cursor-pointer">
-              <Plus size={15} />
+              <Plus
+                onClick={() => handleAddToCart?.(cartItems.product?._id)}
+                size={15}
+              />
             </span>
-            <span className="mx-3">2</span>
+            <span className="mx-3">{cartItems?.qty}</span>
             <span className="cursor-pointer">
-              <Minus size={15} />
+              <Minus
+                onClick={() => handleDeleteToCart?.(cartItems.product?._id)}
+                size={15}
+              />
             </span>
           </div>
         </div>

@@ -21,7 +21,7 @@ export default function ShoppingCart() {
         className="hover:text-primary cursor-pointer" />
       </Link>
       <span className="absolute -top-4 right-[-10px] h-5 w-5 flex items-center justify-center rounded-full bg-primary font-[500] text-white">
-        {cartItems.length + count}
+        {cartItems.length}
       </span>
     </div>
   );

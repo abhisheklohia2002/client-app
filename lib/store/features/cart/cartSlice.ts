@@ -15,7 +15,9 @@ export interface ICartItem {
 export interface ICartState {
   cartItems: ICartItem[];
 }
-
+export interface IProductId {
+  id: string;
+}
 const initialState: ICartState = { cartItems: [] };
 
 export const cartSlice = createSlice({
@@ -32,8 +34,33 @@ export const cartSlice = createSlice({
         state.cartItems.push({ ...action.payload, qty: 1 });
       }
     },
+    incrementCart: (state, action: PayloadAction<string>) => {
+      const item = state.cartItems.find(
+        (x) => x.product._id === action.payload,
+      );
+      if (item) item.qty += 1;
+    },
+    decrementCart: (state, action: PayloadAction<string>) => {
+      const item = state.cartItems.find(
+        (x) => x.product._id === action.payload,
+      );
+      if (item) {
+        item.qty -= 1;
+        if (item.qty <= 0) {
+          state.cartItems = state.cartItems.filter(
+            (x) => x.product._id !== action.payload,
+          );
+        }
+      }
+    },
+    deleteProductById: (state, action: PayloadAction<string>) => {
+      state.cartItems = state.cartItems.filter(
+        (x) => x.product._id !== action.payload,
+      );
+    },
   },
 });
 
-export const { addToCart } = cartSlice.actions;
+export const { addToCart, decrementCart, incrementCart, deleteProductById } =
+  cartSlice.actions;
 export default cartSlice.reducer;
