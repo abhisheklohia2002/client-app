@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import setCookieParser from "set-cookie-parser";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default async function login(prevState: any, formdata: FormData) {
+export default async function loginPage(prevState: any, formdata: FormData) {
   const email = formdata.get("email");
   const password = formdata.get("password");
 

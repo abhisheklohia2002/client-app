@@ -16,9 +16,11 @@ export default function ShoppingCart() {
   return (
     <div className="relative">
       <Link href={"/cart"}>
-        <ShoppingBasket className="hover:text-primary cursor-pointer" />
+        <ShoppingBasket
+        size={22}
+        className="hover:text-primary cursor-pointer" />
       </Link>
-      <span className="absolute -top-4 right-[-10px] h-6 w-6 flex items-center justify-center rounded-full bg-primary font-bold text-white">
+      <span className="absolute -top-4 right-[-10px] h-5 w-5 flex items-center justify-center rounded-full bg-primary font-[500] text-white">
         {cartItems.length + count}
       </span>
     </div>

@@ -4,7 +4,7 @@ import React from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import login from "@/lib/actions/login";
+import loginPage from "@/lib/actions/login";
 
 type LoginState =
   | { type: "success"; message: string }
@@ -24,7 +24,10 @@ function SubmitButton() {
 }
 
 export default function SignInPage() {
-  const [state, formAction] = useFormState(login, initialState);
+  const [state, formAction, isPending] = React.useActionState(
+    loginPage,
+    initialState,
+  );
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">

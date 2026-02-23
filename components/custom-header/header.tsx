@@ -75,24 +75,24 @@ export default async function Header() {
         <div className="flex items-center space-x-3 ">
           <ul className="flex items-center space-x-4 font-medium">
             <li>
-              <Link href={"/"} className="hover:text-primary">
+              <Link href={"/"} className="hover:text-primary text-base">
                 Menu
               </Link>
             </li>
             <li>
-              <Link className="hover:text-primary" href={"/orders"}>
+              <Link className="hover:text-primary text-base" href={"/orders"}>
                 Orders
               </Link>
             </li>
           </ul>
           <ShoppingCart />
           <div className="flex items-center gap-x-2 ml-12 font-medium">
-            <Phone />
-            <span className="hover:text-primary cursor-pointer">
+            <Phone size={20} />
+            <span className="hover:text-primary cursor-pointer text-base">
               +91 99880090
             </span>
           </div>
-          {session && <Logout/>}
+          {session && <Logout />}
           {!session && (
             <Link href={"/login"}>
               <Button size={"sm"}>Login</Button>
