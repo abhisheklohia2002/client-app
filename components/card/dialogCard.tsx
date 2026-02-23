@@ -33,7 +33,7 @@ export default function DialogCard({ product }: PropType) {
   const { priceConfiguration, ...productElem } = product as IProduct & {
     priceConfiguration?: unknown;
   };
-  const handleToCart = () => {
+  const handleToCart = (totalPrice:number) => {
     const payload: ICartItem = {
       product: productElem as IProduct,
       chooseConfiguration: {
@@ -41,6 +41,7 @@ export default function DialogCard({ product }: PropType) {
         topping: toppingsData,
       },
       qty: 1,
+      totalPrice
     };
     const existing: ICartItem[] = JSON.parse(
       localStorage.getItem("addToCart") || "[]",
@@ -154,7 +155,7 @@ export default function DialogCard({ product }: PropType) {
                 ₹{totalPrice}
               </span>
               <Button
-                onClick={() => handleToCart()}
+                onClick={() => handleToCart(totalPrice)}
                 className=" text-sm font-medium cursor-pointer select-none close"
               >
                 <ShoppingCart />

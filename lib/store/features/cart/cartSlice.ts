@@ -9,6 +9,7 @@ export interface ICartItem {
     topping: Topping[];
   };
   qty: number;
+  totalPrice?: number;
 }
 
 export interface ICartState {

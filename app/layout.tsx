@@ -4,12 +4,11 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import Header from "@/components/custom-header/header";
 import StoreProvider from "./StoreProvider";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 const manRopeSans = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
 });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,22 +20,24 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
+  
+
   return (
     <html lang="en">
       <StoreProvider>
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased",
-          manRopeSans.variable
-        )}
+        <body
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            manRopeSans.variable,
+          )}
         >
-         <Toaster />
-       <Header/>
-        <main>
-        {children}
-        </main>
-      </body>
-        </StoreProvider>
+          <Toaster />
+          <Header />
+          <main>{children}</main>
+        </body>
+      </StoreProvider>
     </html>
   );
 }
