@@ -7,7 +7,7 @@ import setCookieParser from "set-cookie-parser";
 export default async function loginPage(prevState: any, formdata: FormData) {
   const email = formdata.get("email");
   const password = formdata.get("password");
-
+    
   const cookieStore = await cookies();
 
   try {
@@ -16,7 +16,7 @@ export default async function loginPage(prevState: any, formdata: FormData) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
-
+    console.log("LOGIN ACTION HIT", response, email, password);
     if (!response.ok) {
       const error = await response.json();
       return { type: "error", message: error?.errors?.[0]?.msg ?? "Login failed" };

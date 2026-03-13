@@ -28,12 +28,13 @@ export default function ToppingList({ handleCheckBox }: IPropsTopping) {
           `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/catalog/topping`,
         );
         const response = await toppingResponse.json();
-
-        setToppingsData(response?.finalTopping || []);
-        setSelectedToppings(
-          response?.finalTopping?.[0] ? [response.finalTopping[0]] : [],
-        );
-        handleCheckBox?.(response?.finalTopping?.[0]);
+        if(response){
+          setToppingsData(response?.finalTopping || []);
+          setSelectedToppings(
+            response?.finalTopping?.[0] ? [response.finalTopping[0]] : [],
+          );
+          handleCheckBox?.(response?.finalTopping?.[0]);
+        }
       } catch (error) {
         console.error(error);
       }
