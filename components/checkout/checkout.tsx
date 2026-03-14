@@ -6,6 +6,7 @@ import { BadgePercent, Coins, House, Landmark, Mail, User } from "lucide-react";
 import Link from "next/link";
 import PaymentCard from "../payment-card/paymentCard";
 import { useAppSelector } from "@/lib/store/hooks/hooks";
+import { useMutation } from "@tanstack/react-query";
 
 type FormData = {
   firstName: string;
@@ -19,16 +20,46 @@ type FormData = {
 interface IDiscount {
   couponName: string;
   couponPrice: number;
-  success:string;
-  fail:string
+  success: string;
+  fail: string;
 }
+type CouponPayload = {
+  code: string;
+  tenantId: number;
+};
+
+type CouponResponse = {
+  success: boolean;
+  message: string;
+  discount?: number;
+};
+const verifyCoupon = async (
+  payload: CouponPayload,
+): Promise<CouponResponse> => {
+  const res = await fetch("/api/coupon", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (data.status === 400) {
+    throw new Error(data?.message || "Failed to verify coupon");
+  }
+  return data;
+};
+
 export function CheckoutPage() {
   const cartItems = useAppSelector((state) => state.cart.cartItems);
   const [discount, setDiscount] = useState<IDiscount>({
     couponName: "",
     couponPrice: 0,
     success: "",
-    fail: ""
+    fail: "",
   });
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -38,9 +69,28 @@ export function CheckoutPage() {
     paymentMode: "",
     comments: "",
     discountCode: "",
-    
   });
-
+  const couponMutation = useMutation({
+    mutationFn: verifyCoupon,
+    onSuccess: (data, variables) => {
+      setDiscount((prev) => ({
+        ...prev,
+        couponName: variables.code,
+        couponPrice: data.discount ?? 0,
+        success: data.message || "Coupon applied successfully.",
+        fail: "",
+      }));
+    },
+    onError: (error: Error) => {
+      setDiscount((prev) => ({
+        ...prev,
+        couponName: "",
+        couponPrice: 0,
+        success: "",
+        fail: error.message || "Unable to apply coupon. Please try again.",
+      }));
+    },
+  });
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -76,34 +126,10 @@ export function CheckoutPage() {
   };
 
   const handleDiscount = async (value: string) => {
-    const res = await fetch("/api/coupon", {
-      method: "POST",
-      cache: "no-store",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ code: value, tenantId: 1 }),
+    couponMutation.mutate({
+      code: value,
+      tenantId: 1,
     });
-
-    const data = await res.json();
-    if (!data?.isValid) {
-      setDiscount((prev) => ({
-        ...prev,
-        couponName: value,
-        couponPrice: 0,
-        fail: "Invalid coupon code.",
-        success:''
-      }));
-      return;
-    }
-    setDiscount((prev) => ({
-      ...prev,
-      couponName: value,
-      couponPrice: data.discount,
-      success: "Coupon applied successfully.",
-      fail:''
-    }));
   };
 
   return (
@@ -219,15 +245,22 @@ export function CheckoutPage() {
               </li>
 
               <li className="flex flex-wrap gap-4 text-sm">
-                Discount {discount.couponName}
-                <span className="ml-auto font-semibold text-[#109B9C] ">
-                  {discount.couponPrice <= 0 ? null : "-"} ₹
-                  {discount.couponPrice === 0 ? 0 : discount.couponPrice + " %"}
+                Discount {discount.couponName && `(${discount.couponName})`}
+                <span className="ml-auto font-semibold text-[#109B9C]">
+                  {discount.couponPrice > 0
+                    ? `- ₹${discount.couponPrice} %`
+                    : "₹0"}
                 </span>
               </li>
-                {/* <div className="text-sm lh-0">
-                  {discount.couponPrice === 0 ? discount.fail:discount.success}
-                </div> */}
+              {discount.success && (
+                <p className="mt-1 text-sm text-green-600">
+                  {discount.success}
+                </p>
+              )}
+
+              {discount.fail && (
+                <p className="mt-1 text-sm text-red-600">{discount.fail}</p>
+              )}
               <hr className="border-gray-300" />
 
               <li className="flex flex-wrap gap-4 text-sm text-slate-900">
@@ -252,8 +285,10 @@ export function CheckoutPage() {
                   type="button"
                   className="rounded-md border border-gray-300 bg-black p-2 text-sm font-medium tracking-wide text-white"
                   onClick={() => handleDiscount(formData.discountCode)}
+                  disabled={couponMutation.isPending}
+
                 >
-                  Apply
+                  {couponMutation.isPending ? "Applying..." : "Apply"}
                 </button>
               </div>
             </ul>
