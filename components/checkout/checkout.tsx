@@ -1,10 +1,11 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { BadgePercent, Coins, House, Landmark, Mail, User } from "lucide-react";
 import Link from "next/link";
 import PaymentCard from "../payment-card/paymentCard";
+import { useAppSelector } from "@/lib/store/hooks/hooks";
 
 type FormData = {
   firstName: string;
@@ -15,9 +16,20 @@ type FormData = {
   comments: string;
   discountCode: string;
 };
-
-
+interface IDiscount {
+  couponName: string;
+  couponPrice: number;
+  success:string;
+  fail:string
+}
 export function CheckoutPage() {
+  const cartItems = useAppSelector((state) => state.cart.cartItems);
+  const [discount, setDiscount] = useState<IDiscount>({
+    couponName: "",
+    couponPrice: 0,
+    success: "",
+    fail: ""
+  });
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -26,13 +38,8 @@ export function CheckoutPage() {
     paymentMode: "",
     comments: "",
     discountCode: "",
+    
   });
-
-  const subtotal = 200;
-  const shipping = 2;
-  const tax = 4;
-  const discount = 0;
-  const total = subtotal + shipping + tax - discount;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -53,6 +60,50 @@ export function CheckoutPage() {
 
   const handleSubmit = () => {
     console.log("All Form Data:", formData);
+  };
+
+  const cartTotal = useMemo(() => {
+    return cartItems.reduce(
+      (acc, item) => acc + Number(item.totalPrice ?? 0) * (item.qty ?? 1),
+      0,
+    );
+  }, [cartItems]);
+  const handleTotal = () => {
+    if (cartTotal !== 0) {
+      return cartTotal - discount.couponPrice;
+    }
+    return 0;
+  };
+
+  const handleDiscount = async (value: string) => {
+    const res = await fetch("/api/coupon", {
+      method: "POST",
+      cache: "no-store",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code: value, tenantId: 1 }),
+    });
+
+    const data = await res.json();
+    if (!data?.isValid) {
+      setDiscount((prev) => ({
+        ...prev,
+        couponName: value,
+        couponPrice: 0,
+        fail: "Invalid coupon code.",
+        success:''
+      }));
+      return;
+    }
+    setDiscount((prev) => ({
+      ...prev,
+      couponName: value,
+      couponPrice: data.discount,
+      success: "Coupon applied successfully.",
+      fail:''
+    }));
   };
 
   return (
@@ -125,7 +176,6 @@ export function CheckoutPage() {
               </div>
             </div>
 
-           
             <PaymentCard
               handlePaymentMode={handlePaymentMode}
               formData={formData}
@@ -149,38 +199,40 @@ export function CheckoutPage() {
               <li className="flex flex-wrap gap-4 text-sm">
                 Subtotal
                 <span className="ml-auto font-semibold text-slate-900">
-                  ₹{subtotal.toFixed(2)}
+                  ₹{cartTotal}
+                  .00
                 </span>
               </li>
 
               <li className="flex flex-wrap gap-4 text-sm">
                 Shipping
                 <span className="ml-auto font-semibold text-slate-900">
-                  ₹{shipping.toFixed(2)}
+                  ₹{0}
                 </span>
               </li>
 
               <li className="flex flex-wrap gap-4 text-sm">
                 Tax
                 <span className="ml-auto font-semibold text-slate-900">
-                  ₹{tax.toFixed(2)}
+                  ₹{0}
                 </span>
               </li>
 
               <li className="flex flex-wrap gap-4 text-sm">
-                Discount
-                <span className="ml-auto font-semibold text-slate-900">
-                  ₹{discount.toFixed(2)}
+                Discount {discount.couponName}
+                <span className="ml-auto font-semibold text-[#109B9C] ">
+                  {discount.couponPrice <= 0 ? null : "-"} ₹
+                  {discount.couponPrice === 0 ? 0 : discount.couponPrice + " %"}
                 </span>
               </li>
-
+                {/* <div className="text-sm lh-0">
+                  {discount.couponPrice === 0 ? discount.fail:discount.success}
+                </div> */}
               <hr className="border-gray-300" />
 
               <li className="flex flex-wrap gap-4 text-sm text-slate-900">
                 Total
-                <span className="ml-auto font-semibold">
-                  ₹{total.toFixed(2)}
-                </span>
+                <span className="ml-auto font-semibold">₹{handleTotal()}</span>
               </li>
 
               <div className="flex items-center gap-2">
@@ -199,9 +251,7 @@ export function CheckoutPage() {
                 <button
                   type="button"
                   className="rounded-md border border-gray-300 bg-black p-2 text-sm font-medium tracking-wide text-white"
-                  onClick={() =>
-                    console.log("Discount code:", formData.discountCode)
-                  }
+                  onClick={() => handleDiscount(formData.discountCode)}
                 >
                   Apply
                 </button>

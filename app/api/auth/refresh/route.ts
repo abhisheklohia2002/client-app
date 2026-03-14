@@ -30,7 +30,7 @@ export async function POST() {
 
   if (!access || !refresh) {
     return Response.json({
-     message:"token is missing"
+      message: "token is missing",
     });
   }
 
@@ -56,6 +56,6 @@ export async function POST() {
     secure,
   });
   return Response.json({
-    success:true
-  })
+    success: true,
+  });
 }

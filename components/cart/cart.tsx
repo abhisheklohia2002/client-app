@@ -9,7 +9,6 @@ import {
   ICartItem,
   incrementCart,
 } from "@/lib/store/features/cart/cartSlice";
-import { House, Mail, Phone, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
